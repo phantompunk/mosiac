@@ -3,11 +3,16 @@ package main
 import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/phantompunk/mosaic/handler"
+	"github.com/phantompunk/mosaic/helper"
+	"github.com/phantompunk/mosaic/service"
 )
 
 func main() {
+	imageDownloader := service.NewInstagramDownloader(helper.InstagramHelper)
+
 	mosaicLambda := handler.MosaicLambda{
-		Name: "rigo",
+		Name:         "rigo",
+		ImageManager: imageDownloader,
 	}
 
 	lambda.Start(mosaicLambda.HandleRequest)

@@ -11,11 +11,21 @@ type MosaicLambda struct {
 	InstagramManager service.InstagramManager
 }
 
+type MosaicRequest struct {
+	Hashtag string `json:"hashtag,omitempty"`
+}
+
+type MosaicResponse struct {
+	Key string
+}
+
 // HandleRequest is the main entry point for the lambda function
-func (m *MosaicLambda) HandleRequest(searchTag string) (int, error) {
+func (m *MosaicLambda) HandleRequest(req MosaicRequest) (MosaicResponse, error) {
 	// 1. Fetch photo urls
-	log.Info("Start image fetch for ", searchTag)
-	return 0, nil
+	log.Info("Start image fetch for ", req.Hashtag)
+	return MosaicResponse{
+		Key: req.Hashtag,
+	}, nil
 }
 
 // LocalRequest is the main entry point for the local execution
@@ -30,5 +40,5 @@ func (m *MosaicLambda) LocalRequest(searchTag string) (string, error) {
 	// 2b. Download photos
 	// 2c. Place phot
 
-	return "", nil
+	return searchTag, nil
 }

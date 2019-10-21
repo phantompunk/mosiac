@@ -30,6 +30,24 @@ func TestFetchUrls(t *testing.T) {
 	}
 }
 
+func TestDownloadImage(t *testing.T) {
+	results := []string{
+		"https://insta.fbcdn.net/v/t51/e35/p1080x1080/7630_n.jpg",
+		"https://insta.fbcdn.net/v/t56/e25/p1080x1080/47530_n.jpg",
+	}
+
+	provider := &InstagramProvider{}
+
+	for _, url := range results {
+		img, err := provider.DownloadImage(url)
+		if err != nil {
+			t.Fatalf("Image download failed")
+		}
+		if img != nil {
+		}
+	}
+}
+
 type MockInstagramClient struct{}
 
 type MockInstagramFeed struct{}

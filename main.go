@@ -28,6 +28,6 @@ func main() {
 	if env == "dev" {
 		lambda.Start(mosaic.HandleRequest)
 	} else {
-		mosaic.LocalRequest("golang")
+		mosaic.LocalRequest("code")
 	}
 }

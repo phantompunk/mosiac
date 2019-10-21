@@ -1,6 +1,11 @@
 package service
 
 import (
+	"errors"
+	"fmt"
+	"image"
+	"image/png"
+	"net/http"
 	"os"
 
 	"github.com/ahmdrz/goinsta/v2"
@@ -60,6 +65,32 @@ func NewInstagramProvider() (*InstagramProvider, error) {
 		Client: insta,
 		Feed:   insta.Feed,
 	}, nil
+}
+
+func DownloadImage(url string, id int) (image.Image, error) {
+	response, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return nil, errors.New(response.Status)
+	}
+
+	img, _, err := image.Decode(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	filename := fmt.Sprintf("./output-%d%s", id, ".png")
+	out, err := os.Create(filename)
+	if err != nil {
+	}
+
+	err = png.Encode(out, img)
+
+	return img, nil
 }
 
 // GetSmallestImage returns the smallest sized image available

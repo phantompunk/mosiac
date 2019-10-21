@@ -1,14 +1,16 @@
 package handler
 
 import (
+	"image"
+
 	"github.com/phantompunk/mosaic/service"
 	log "github.com/sirupsen/logrus"
 )
 
 // MosaicLambda represent the main lambda and it's dependencies
 type MosaicLambda struct {
-	Name             string
-	InstagramManager service.InstagramManager
+	ImageProvider *service.InstagramProvider
+	Transformer   Transformer
 }
 
 type MosaicRequest struct {
@@ -17,6 +19,10 @@ type MosaicRequest struct {
 
 type MosaicResponse struct {
 	Key string
+}
+
+type Transformer interface {
+	Merge([]image.Image) image.RGBA
 }
 
 // HandleRequest is the main entry point for the lambda function
@@ -33,7 +39,7 @@ func (m *MosaicLambda) LocalRequest(searchTag string) (string, error) {
 	log.Info("starting local run")
 
 	// 1. Fetch photo urls
-	results, _ := m.InstagramManager.FetchImageUrlsByTag(searchTag)
+	results, _ := m.ImageProvider.SearchByTag(searchTag)
 	log.Info(len(results), " images found")
 	// 2. Transform photos
 	// 2a. Create mosaic rectangle

@@ -13,16 +13,16 @@ func main() {
 
 	env := os.Getenv("ENVIRONMENT")
 	if env == "" {
-		env = "dev"
+		env = "local"
 	}
-	client, err := service.NewInstagramClient()
+	provider, err := service.NewInstagramProvider()
 	if err != nil {
 		log.Fatal("Failed to login")
 	}
-	defer client.Close()
+	defer provider.Client.Logout()
 
 	mosaic := handler.MosaicLambda{
-		InstagramManager: client,
+		ImageProvider: provider,
 	}
 
 	if env == "dev" {

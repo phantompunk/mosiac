@@ -36,10 +36,11 @@ func (i *InstagramProvider) SearchByTag(tag string) ([]string, error) {
 
 	for _, item := range feedTag.Images {
 		if item.Images.Versions != nil {
-		}
-		url := GetSmallestImage(item.Images)
-		if url != "" {
-			results = append(results, url)
+			url := GetSmallestImage(item.Images)
+			log.Info(url)
+			if url != "" {
+				results = append(results, url)
+			}
 		}
 	}
 	return results, nil

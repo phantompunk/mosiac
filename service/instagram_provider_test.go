@@ -53,6 +53,12 @@ func (m MockInstagramFeed) Tags(tag string) (*goinsta.FeedTag, error) {
 							Height: 100,
 							URL:    "https://insta.fbcdn.net/v/t51/e35/p1080x1080/7630_n.jpg",
 						},
+					},
+				},
+			},
+			goinsta.Item{
+				Images: goinsta.Images{
+					Versions: []goinsta.Candidate{
 						goinsta.Candidate{
 							Width:  100,
 							Height: 100,

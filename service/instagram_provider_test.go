@@ -36,10 +36,10 @@ func TestDownloadImage(t *testing.T) {
 		"https://insta.fbcdn.net/v/t56/e25/p1080x1080/47530_n.jpg",
 	}
 
-	provider := &InstagramProvider{}
+	// provider := &InstagramProvider{}
 
 	for _, url := range results {
-		img, err := provider.DownloadImage(url)
+		img, err := DownloadImage(url, 5)
 		if err != nil {
 			t.Fatalf("Image download failed")
 		}

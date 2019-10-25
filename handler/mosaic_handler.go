@@ -99,7 +99,7 @@ func (m *MosaicLambda) LocalRequest(searchTag string) (string, error) {
 func worker(id int, jobs <-chan string, images chan<- image.Image, rect *image.RGBA) {
 	for j := range jobs {
 		img, _ := service.DownloadImage(j, id)
-		merge(id, img, rect)
+		merge(id-1, img, rect)
 		// draw.Draw(rect, img.Bounds(), img, image.Point{}, draw.Src)
 		images <- img
 	}

@@ -42,7 +42,6 @@ func (i *InstagramProvider) SearchByTag(tag string) ([]string, error) {
 	for _, item := range feedTag.Images {
 		if item.Images.Versions != nil {
 			url := GetSmallestImage(item.Images)
-			log.Info(url)
 			if url != "" {
 				results = append(results, url)
 			}
@@ -95,10 +94,16 @@ func DownloadImage(url string, id int) (image.Image, error) {
 
 // GetSmallestImage returns the smallest sized image available
 func GetSmallestImage(img goinsta.Images) string {
-	temp := ""
+
+	if len(img.Versions) == 0 {
+		return ""
+	}
+
+	t := img.Versions[0]
+	temp := t.URL
+	th, tw := t.Height, t.Width
+
 	for _, v := range img.Versions {
-		temp = v.URL
-		th, tw := v.Height, v.Width
 		if v.Width < tw || v.Height < th {
 			temp = v.URL
 			th, tw = v.Height, v.Width

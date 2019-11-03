@@ -33,7 +33,6 @@ func NewCanvas(size int, length int) *Transformer {
 
 func (t *Transformer) Merge(img image.Image) {
 	id := t.Count
-	// size := int((math.Pow(float64(id), 2)))
 
 	x := id % t.Size
 	y := math.Round(float64(id / t.Size))

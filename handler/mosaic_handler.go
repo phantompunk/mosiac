@@ -2,7 +2,6 @@ package handler
 
 import (
 	"image"
-	"image/draw"
 	"math"
 
 	"github.com/phantompunk/mosaic/service"
@@ -12,7 +11,7 @@ import (
 // MosaicLambda represent the main lambda and it's dependencies
 type MosaicLambda struct {
 	ImageProvider *service.InstagramProvider
-	Transformer   service.Transformer
+	Transformer   *service.Transformer
 }
 
 type MosaicRequest struct {
@@ -40,41 +39,26 @@ func (m *MosaicLambda) LocalRequest(searchTag string) (string, error) {
 	results, _ := m.ImageProvider.SearchByTag(searchTag)
 	log.Info(len(results), " images found")
 
-	// 2. Create a 2x2 Rectangle
-	// var width = 320
-	// rectangle := image.NewRGBA(image.Rectangle{
-	// 	Max: image.Point{
-	// 		X: 5 * width,
-	// 		Y: 5 * height,
-	// 	},
-	// })
-
-	// m.Transformer = &Transformer{}
-	log.Info("Size before:", m.Transformer.Size)
+	// 2. Create a 2x2 RectangleS
+	size := m.Transformer.Size
+	grids := int(math.Pow(float64(size), 2))
+	log.Info("Size before:", size)
 
 	// 3. Download images and merge
-	jobs := make(chan string, 5)
-	images := make(chan image.Image, 5)
+	jobs := make(chan string, size)
+	images := make(chan image.Image, size)
 
-	for w := 1; w <= 25; w++ {
+	for w := 1; w <= grids; w++ {
 		go worker(*m, w, jobs, images, m.Transformer.Canvas)
 	}
-	for j := 1; j <= 25; j++ {
+	for j := 1; j <= grids; j++ {
 		jobs <- results[j]
 	}
 	close(jobs)
-	for a := 1; a <= 25; a++ {
+	for a := 1; a <= grids; a++ {
 		<-images
 	}
 
-	// 4. Return the combined image
-	// out, err := os.Create("./merged.jpg")
-	// if err != nil {
-	// }
-	// var opt jpeg.Options
-	// opt.Quality = 80
-	// jpeg.Encode(out, rectangle, &opt)
-	// service.transformer.Export()
 	m.Transformer.Export()
 
 	return searchTag, nil
@@ -82,22 +66,14 @@ func (m *MosaicLambda) LocalRequest(searchTag string) (string, error) {
 
 func worker(m MosaicLambda, id int, jobs <-chan string, images chan<- image.Image, rect *image.RGBA) {
 	for j := range jobs {
-		img, _ := service.DownloadImage(j, id)
+		img, err := service.DownloadImage(j, id)
+		if err != nil {
+			log.Error("Image couldn't download compeletly")
+		}
 		// service.transformer.combine()
 		// merge(id-1, img, rect)
-		log.Info("Size:", m.Transformer.Size)
 		m.Transformer.Merge(img)
 		// draw.Draw(rect, img.Bounds(), img, image.Point{}, draw.Src)
 		images <- img
 	}
-}
-
-func merge(id int, img image.Image, rect *image.RGBA) {
-	x := id % 5
-	y := math.Round(float64(id / 5))
-	minPoint := image.Point{x * 320, int(y) * 320}
-	maxPoint := minPoint.Add(image.Point{320, 320})
-	nextRect := image.Rectangle{minPoint, maxPoint}
-
-	draw.Draw(rect, nextRect, img, image.Point{}, draw.Src)
 }

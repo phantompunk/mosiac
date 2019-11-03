@@ -15,19 +15,23 @@ func main() {
 	if env == "" {
 		env = "local"
 	}
+
 	provider, err := service.NewInstagramProvider()
 	if err != nil {
 		log.Fatal("Failed to login")
 	}
 	defer provider.Client.Logout()
 
+	transformer := service.NewCanvas(3, 300)
+
 	mosaic := handler.MosaicLambda{
 		ImageProvider: provider,
+		Transformer:   transformer,
 	}
 
 	if env == "dev" {
 		lambda.Start(mosaic.HandleRequest)
 	} else {
-		mosaic.LocalRequest("balvinistas")
+		mosaic.LocalRequest("worldjellyfishday")
 	}
 }

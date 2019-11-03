@@ -50,14 +50,6 @@ func TestTransformer_NewCanvas(t *testing.T) {
 	if got != expectedSize {
 		t.Errorf("Canvas is not the expected size, got %d want %d", got, expectedSize)
 	}
-
-	// img1 := image.NewRGBA(image.Rectangle{})
-	// img2 := image.NewRGBA(image.Rectangle{})
-	// transformer := &Transformer{}
-	// transformer.NewCanvas(5, 350)
-	// transformer.Merge(img1)
-	// transformer.Merge(img2)
-	// transformer.Export()
 }
 
 func GenerateRandomGrid(length int) *image.RGBA {

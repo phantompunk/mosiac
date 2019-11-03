@@ -3,9 +3,7 @@ package handler
 import (
 	"image"
 	"image/draw"
-	"image/jpeg"
 	"math"
-	"os"
 
 	"github.com/phantompunk/mosaic/service"
 	log "github.com/sirupsen/logrus"
@@ -14,7 +12,7 @@ import (
 // MosaicLambda represent the main lambda and it's dependencies
 type MosaicLambda struct {
 	ImageProvider *service.InstagramProvider
-	Transformer   Transformer
+	Transformer   service.Transformer
 }
 
 type MosaicRequest struct {
@@ -23,10 +21,6 @@ type MosaicRequest struct {
 
 type MosaicResponse struct {
 	Key string
-}
-
-type Transformer interface {
-	Merge([]image.Image) image.RGBA
 }
 
 // HandleRequest is the main entry point for the lambda function
@@ -47,59 +41,52 @@ func (m *MosaicLambda) LocalRequest(searchTag string) (string, error) {
 	log.Info(len(results), " images found")
 
 	// 2. Create a 2x2 Rectangle
-	var width, height = 320, 320
-	rect := image.NewRGBA(image.Rectangle{
-		Max: image.Point{
-			X: 5 * width,
-			Y: 5 * height,
-		},
-	})
+	// var width = 320
+	// rectangle := image.NewRGBA(image.Rectangle{
+	// 	Max: image.Point{
+	// 		X: 5 * width,
+	// 		Y: 5 * height,
+	// 	},
+	// })
 
+	// m.Transformer = &Transformer{}
+	log.Info("Size before:", m.Transformer.Size)
+
+	// 3. Download images and merge
 	jobs := make(chan string, 5)
 	images := make(chan image.Image, 5)
 
 	for w := 1; w <= 25; w++ {
-		go worker(w, jobs, images, rect)
+		go worker(*m, w, jobs, images, m.Transformer.Canvas)
 	}
-
 	for j := 1; j <= 25; j++ {
 		jobs <- results[j]
 	}
 	close(jobs)
-
 	for a := 1; a <= 25; a++ {
 		<-images
 	}
 
-	out, err := os.Create("./merged.jpg")
-	if err != nil {
-	}
-
-	var opt jpeg.Options
-	opt.Quality = 80
-
-	jpeg.Encode(out, rect, &opt)
-	// img, err := service.DownloadImage(results[0])
+	// 4. Return the combined image
+	// out, err := os.Create("./merged.jpg")
 	// if err != nil {
 	// }
-
-	// out, err := os.Create("./output.png")
-	// if err != nil {
-	// }
-
-	// err = png.Encode(out, img)
-	// 2. Transform photos
-	// 2a. Create mosaic rectangle
-	// 2b. Download photos
-	// 2c. Place phot
+	// var opt jpeg.Options
+	// opt.Quality = 80
+	// jpeg.Encode(out, rectangle, &opt)
+	// service.transformer.Export()
+	m.Transformer.Export()
 
 	return searchTag, nil
 }
 
-func worker(id int, jobs <-chan string, images chan<- image.Image, rect *image.RGBA) {
+func worker(m MosaicLambda, id int, jobs <-chan string, images chan<- image.Image, rect *image.RGBA) {
 	for j := range jobs {
 		img, _ := service.DownloadImage(j, id)
-		merge(id-1, img, rect)
+		// service.transformer.combine()
+		// merge(id-1, img, rect)
+		log.Info("Size:", m.Transformer.Size)
+		m.Transformer.Merge(img)
 		// draw.Draw(rect, img.Bounds(), img, image.Point{}, draw.Src)
 		images <- img
 	}
